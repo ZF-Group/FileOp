@@ -1,0 +1,21 @@
+{
+    "version": "0.2",
+    "files": [
+        "/**"
+    ],
+    "ignorePaths": [
+        "/.git/"
+    ],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "enableGlobDot": true,
+    "words": [
+    ],
+    "ignoreWords": [
+    ],
+    "ignoreRegExpList": [
+        // GH actions
+        "uses: [^\\s]+/[^\\s]+@[^\\s]+"
+    ],
+    "import": []
+}
