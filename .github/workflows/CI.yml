@@ -2,6 +2,8 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Run FileOp CI
+permissions:
+  contents: read
 
 on:
   workflow_dispatch: # For manual triggering
