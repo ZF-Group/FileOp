@@ -11,18 +11,23 @@ Windows command line tools only support paths with a maximum length of 260 chara
 As workaround you need to subst the directory to a drive letter and delete the sub
 tree from there.
 
-## Directory layout
+## Usage
 
-dir     | description
----     | ---
-`build` | *ignored*: Storage of build-results
-`src`   | Storage for source files
-`tests` | Storage for test scripts
+All supported commands are compiled into a single executable `FileOp.exe`. To get a list of commands
+and the available options you can execute `FileOp.exe --help`.
 
 ## Development
 
 For development a workspace for `Visual Studio Code` is configured together with a cross compiler
 running under docker.
+
+## Directory layout
+
+| dir       | description                         |
+| --------- | ----------------------------------- |
+| `build`   | *ignored*: Storage of build results |
+| `scripts` | Storage for source files            |
+| `src`     | Storage for source files            |
 
 ### Build
 
@@ -33,4 +38,4 @@ execute the tools.
 
 ### Test
 
-To test the generated artifacts call `.\tools\test.cmd` or use `Terminal`->`Run Task...`->`Test` in the IDE.
+The test are also written in CMake and executed by calling [scripts/cmake.test.sh](./scripts/cmake.test.sh).

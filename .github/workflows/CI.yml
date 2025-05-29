@@ -56,11 +56,16 @@ jobs:
           apt update
           apt install -y git
       - uses: actions/checkout@v4
+     
+      - name: Install build tools
+        run: |
+          ./scripts/container.setup.sh
 
       - name: Configure
         run: |
           git config --global --add safe.directory $PWD
           ./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
+
       - name: Build
         run:
           ./scripts/cmake.build.sh
@@ -92,8 +97,16 @@ jobs:
 
       - name: Configure
         run: ./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
+
       - name: Build
         run: ./scripts/cmake.build.sh
+      - name: Upload FileOp.7z
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-windows${{ matrix.BuildType == 'Profile' && '-profile' || ''}}
+          path: build/FileOp.7z
+
       - name: Test
         run: |
           ./scripts/cmake.test.sh || ExitCode=$?
@@ -104,6 +117,12 @@ jobs:
       - name: Run performance test
         if: always()
         run: ./scripts/run_test_performance.sh  2>&1 | tee performance.txt
+      - name: Upload performance report
+        if: ${{ matrix.BuildType == 'Release' && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance
+          path: performance.txt
 
       - name: Create coverage report
         if: ${{ matrix.BuildType == 'Profile' && always() }}
@@ -122,13 +141,6 @@ jobs:
         with:
           name: coverage
           path: coverage.*
-
-      - name: Upload ZIP
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-windows${{ matrix.BuildType == 'Profile' && '-profile' || ''}}
-          path: build/FileOp.7z
 
   deploy:
     needs:
@@ -149,7 +161,11 @@ jobs:
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
-          pattern: coverage
+          name: coverage
+      - name: Download performance report
+        uses: actions/download-artifact@v4
+        with:
+          name: performance
       # cspell:ignore oapp
       - name: Test container release build
         run: |
@@ -175,7 +191,9 @@ jobs:
             echo ""
             echo "# Test coverage report"
             echo ""
+            echo '```'
             cat coverage.txt
+            echo '```'
             echo ""
             cat performance.txt
           ) >> $GITHUB_STEP_SUMMARY
@@ -187,7 +205,8 @@ jobs:
           git config --global user.name "FileOp authors"
 
           # Create the tag and print the output.
-          git tag -a "$FILEOP_VERSION" -m "$FILEOP_VERSION ($(date -I))"
+          sed -e "/^# / { s/^# //; s/$/ $(date -I)/; }" release_notes.md | tee commit_msg.txt
+          git tag -a "$FILEOP_VERSION" -F commit_msg.txt
           git tag --list -n "$FILEOP_VERSION"
 
       - name: Push new tag

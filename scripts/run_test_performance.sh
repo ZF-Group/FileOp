@@ -24,64 +24,50 @@ function append_rsp() {
    fi
 }
 
+function time_it() {
+   echo -n " "
+   (time "$@") 2>&1 | sed --silent '/real/ { s/real\s*//; p; }' | tr '\r\n' '  '
+   echo -n "|"
+}
+
+append_rsp root 0
+
 echo """## Performance test
 
-Creating lists for $max directories with with a depth of $max levels and $max files in each"""
-time append_rsp root 0
-echo """Lists contain $(wc --lines < mkdir.rsp) directories and $(wc --lines < touch.rsp) files.
-Longest filename has $(wc --max-line-length < touch.rsp) characters.
 """
 sed --regexp-extended -s 's|/|\\\\|g' < mkdir.rsp > mkdir.backslash.rsp
 sed --regexp-extended -s 's|/|\\\\|g' < touch.rsp > touch.backslash.rsp
 
 ###############################################################################
-echo """
-### Using cmd
-
-#### Creating directories"""
-time xargs --max-chars=8000 --arg-file mkdir.backslash.rsp -I '{}' cmd.exe //c "mkdir {}" \;
-echo "
-#### Creating files"
-time xargs --max-chars=8000 --arg-file touch.backslash.rsp -I '{}' cmd.exe //c "for %f in ( {} ) do @( echo. > %f )" \;
-echo "
-#### Removing tree"
-time rm -rf root
-
+echo "| Environment | Create $(wc --lines < mkdir.rsp) directories | Create $(wc --lines < touch.rsp) files | Remove tree |"
+echo "| ----------- | -------------------------------------------- | -------------------------------------- | ----------- |"
 ###############################################################################
-echo """
-### Using bash
-
-#### Creating directories"""
-time xargs --max-chars=8000 --arg-file mkdir.rsp mkdir
-echo "
-#### Creating files"
-time xargs --max-chars=8000 --arg-file touch.rsp touch
-echo "
-#### Removing tree"
-time rm -rf root
-
+echo -n "| cmd |"
+time_it xargs --max-chars=8000 --arg-file mkdir.backslash.rsp -I '{}' cmd.exe //c "mkdir {}" \;
+time_it xargs --max-chars=8000 --arg-file touch.backslash.rsp -I '{}' cmd.exe //c "for %f in ( {} ) do @( echo. > %f )" \;
+time_it cmd.exe //c "rmdir /S /Q root"
+echo ""
 ###############################################################################
-echo """
-### Using FileOp
-
-#### Creating directories"""
-time xargs --max-chars=8000 --arg-file mkdir.rsp FileOp.exe mkdir
-echo "
-#### Creating files"
-time xargs --max-chars=8000 --arg-file touch.rsp FileOp.exe touch
-echo "
-#### Removing tree"
-time FileOp.exe remove --recursive --force root
-
+echo -n "| bash |"
+time_it xargs --max-chars=8000 --arg-file mkdir.rsp mkdir
+time_it xargs --max-chars=8000 --arg-file touch.rsp touch
+time_it rm -rf root
+echo ""
 ###############################################################################
-echo """
-### Using FileOp with rsp
+echo -n "| FileOp |"
+time_it xargs --max-chars=8000 --arg-file mkdir.rsp FileOp.exe mkdir
+time_it xargs --max-chars=8000 --arg-file touch.rsp FileOp.exe touch
+time_it FileOp.exe remove --recursive --force root
+echo ""
+###############################################################################
+echo -n "| FileOp with rsp file |"
+time_it FileOp.exe mkdir @mkdir.rsp
+time_it FileOp.exe touch @touch.rsp
+time_it FileOp.exe remove --recursive --force root
+echo ""
 
-#### Creating directories"""
-time FileOp.exe mkdir @mkdir.rsp
-echo "
-#### Creating files"
-time FileOp.exe touch @touch.rsp
-echo "
-#### Removing tree"
-time FileOp.exe remove --recursive --force root
+echo """
+If no response file is supported \`xargs\` is used for execution and needs to call the command
+$((xargs --max-chars=8000 --arg-file mkdir.rsp echo) | wc --lines) times for the directories and
+$((xargs --max-chars=8000 --arg-file touch.rsp echo) | wc --lines) times for the file creation.
+"""

@@ -8,23 +8,18 @@
 		"actionButtons": {
 			"commands": [
 				{
-					"name": "Setup env",
-					"command": "docker run --rm --platform linux/amd64 dockcross/windows-static-x64 > ./dockcross && chmod +x ./dockcross",
-					"singleInstance": true
-				},
-				{
 					"name": "Configure (Profile)",
-					"command": "./dockcross --args '--platform linux/amd64' bash -c './scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=Profile'",
+					"command": "./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=Profile",
 					"singleInstance": true
 				},
 				{
 					"name": "Configure (Release)",
-					"command": "./dockcross --args '--platform linux/amd64' bash -c './scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=Release'",
+					"command": "./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=Release",
 					"singleInstance": true
 				},
 				{
 					"name": "Build",
-					"command": "./dockcross --args '--platform linux/amd64' bash -c './scripts/cmake.build.sh'",
+					"command": "./scripts/cmake.build.sh",
 					"singleInstance": true
 				}
 			],
@@ -40,7 +35,7 @@
 			"seunlanlege.action-buttons",
 			"streetsidesoftware.code-spell-checker",
 			"EditorConfig.EditorConfig",
-			"ms-vscode.cpptools-extension-pack"
+			"ms-vscode.cpptools"
 		]
 		// cspell:enable
 	}

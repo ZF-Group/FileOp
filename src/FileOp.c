@@ -99,7 +99,7 @@ int _tmain(int argc, wchar_t *argv[]) {
    // GCOVR_EXCL_STOP
 
    DWORD ProgramNameLen = _tcslen(Ptr);
-   if (ProgramNameLen > PROGRAM_NAME_BUFFER_SIZE) { // GCOVR_EXCL_BR
+   if (ProgramNameLen > PROGRAM_NAME_BUFFER_SIZE) { // GCOVR_EXCL_BR_LINE
       // GCOVR_EXCL_START
       _tcscpy(ProgramName, _T("..."));
       _tcscat(ProgramName, &Ptr[ProgramNameLen - (PROGRAM_NAME_BUFFER_SIZE + 3 + 1)]);

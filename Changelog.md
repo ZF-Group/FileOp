@@ -3,10 +3,10 @@
 
 <!-- cspell:ignore INFDTEP -->
 
-## Unreleased
+## 1.9.0
 
 - First release under BSD 3-Clause License.
-- Use CMake and cross compiling with gcc-11.
+- Use CMake and cross compiling with mingw-w64 to be able to build on all systems running Docker.
 
 ## 1.8.0
 
