@@ -1,4 +1,6 @@
 
+[![Run FileOp CI](https://github.com/ZF-Group/FileOp/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ZF-Group/FileOp/actions/workflows/CI.yml)
+
 # FileOp
 
 Tool for general file operations under Windows with support of file names longer than MAX_PATH (260 characters).
