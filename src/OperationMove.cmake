@@ -44,7 +44,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME MoveFileWithTargetDirectory
    PREPARE_COMMAND "mkdir SubDir && cp -f ${CMAKE_CURRENT_LIST_FILE} ."
-   ARGS move --target-directory=SubDir OperationMove.cmake
+   ARGS move OperationMove.cmake SubDir/
    MUST_NOT_EXIST OperationMove.cmake
    MUST_EXIST SubDir/OperationMove.cmake
 )
@@ -87,7 +87,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME MoveFileListWithPatternExisting
    PREPARE_COMMAND "mkdir -p Source Target && cp -f ${CMAKE_CURRENT_LIST_DIR}/OperationMove.* Source/ && cp -f Source/*.* Target/"
-   ARGS move --touch --time=2002-01-01T00:30 Target/OperationMove.* MoveFileListWithPatternTarget/
+   ARGS move --touch --check-unique-names --time=2002-01-01T00:30 Target/OperationMove.* MoveFileListWithPatternTarget/
    WILL_FAIL
    MUST_EXIST Source/OperationMove.c Source/OperationMove.cmake Source/OperationMove.h
 )
@@ -120,7 +120,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME MoveDirectoryToExistingFile
    PREPARE_COMMAND "mkdir SubDir && touch target SubDir/file"
-   ARGS --debug move --target-directory target SubDir
+   ARGS --debug move -t target SubDir
    WILL_FAIL
    MUST_EXIST target
    MUST_NOT_EXIST target/SubDir/file
@@ -146,8 +146,17 @@ test_fileop_check_filesystem(
 
 test_fileop_check_filesystem(
    NAME MoveDirectoryRecursive
+   PREPARE_COMMAND "mkdir -p source target/source && cp -rf ${CMAKE_CURRENT_LIST_DIR}/OperationMove.* source/"
+   ARGS --debug move --force --touch --time 2000-01-01 source target/
+   MUST_EXIST target/source/OperationMove.c target/source/OperationMove.cmake target/source/OperationMove.h
+   MUST_NOT_EXIST source/OperationMove.c source/OperationMove.cmake source/OperationMove.h
+   FILE_TIMESTAMP_REGEX "2000-01-01 12:00:00\\.000000000 \\+0000"
+)
+
+test_fileop_check_filesystem(
+   NAME MoveDirectoryRecursiveProtected
    PREPARE_COMMAND "mkdir -p source target/source && cp -rf ${CMAKE_CURRENT_LIST_DIR}/OperationMove.* source/ && chmod -R oga-w ."
-   ARGS --debug move --force --touch --time 2000-01-01 source target
+   ARGS --debug move -f --touch --time 2000-01-01 source target
    MUST_EXIST target/source/OperationMove.c target/source/OperationMove.cmake target/source/OperationMove.h
    MUST_NOT_EXIST source/OperationMove.c source/OperationMove.cmake source/OperationMove.h
    FILE_TIMESTAMP_REGEX "2000-01-01 12:00:00\\.000000000 \\+0000"

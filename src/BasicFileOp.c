@@ -188,7 +188,7 @@ tResult removeReparsePoint(LPCTSTR currentPath) {
 
    HANDLE Handle =
        CreateFile(currentPath, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
-   if (Handle == INVALID_HANDLE_VALUE) {
+   if (Handle == INVALID_HANDLE_VALUE) {                                                     // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't get handle to %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
    }
 
@@ -205,7 +205,7 @@ tResult removeReparsePoint(LPCTSTR currentPath) {
       return eError;
       // GCOVR_EXCL_STOP
    }
-   if (CloseHandle(Handle) == 0) {
+   if (CloseHandle(Handle) == 0) {                                                             // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't close handle to %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
    }
    return removeEmptyDirectory(currentPath);
@@ -284,7 +284,7 @@ tResult touchSingleFile(LPCTSTR currentPath, tBool createIfMissing) {
       printOut(_T("Touch file %s\n"), getReadableFilename(currentPath));
    }
    hFile = CreateFile(currentPath, FILE_WRITE_ATTRIBUTES, 0, NULL, createIfMissing ? OPEN_ALWAYS : OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-   if (hFile == INVALID_HANDLE_VALUE) {
+   if (hFile == INVALID_HANDLE_VALUE) {                                                      // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't get handle to %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
    } else {
       LPFILETIME pft = ptr_file_time;
@@ -295,14 +295,14 @@ tResult touchSingleFile(LPCTSTR currentPath, tBool createIfMissing) {
          pft = &ft;
          GetSystemTime(&st);
          // Converts the current system time to file time format
-         if (SystemTimeToFileTime(&st, &ft) == 0) {
+         if (SystemTimeToFileTime(&st, &ft) == 0) {                              // GCOVR_EXCL_BR_LINE
             return printLastError(_T("Can't convert system time to file time")); // GCOVR_EXCL_LINE
          }
       }
-      if (SetFileTime(hFile, (LPFILETIME)NULL, pft, pft) == 0) {
+      if (SetFileTime(hFile, (LPFILETIME)NULL, pft, pft) == 0) {                                               // GCOVR_EXCL_BR_LINE
          return printLastError(_T("Can't set access and write time of %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
       }
-      if (CloseHandle(hFile) == 0) {
+      if (CloseHandle(hFile) == 0) {                                                              // GCOVR_EXCL_BR_LINE
          return printLastError(_T("Can't close handle to %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
       }
    }
@@ -341,7 +341,7 @@ tResult openFile(LPCTSTR currentPath, HANDLE *handle) {
  * @return The handle or INVALID_HANDLE_VALUE if open wasn't successful.
  */
 tResult closeFile(LPCTSTR currentPath, HANDLE *handle) {
-   if (CloseHandle(handle) == 0) {
+   if (CloseHandle(handle) == 0) {                                                             // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't close handle to %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
    }
 
@@ -396,13 +396,13 @@ tResult storeTimeValue(int *argc, wchar_t **argv[]) {
       return printErr(_T("Wrong format for time %s, expected yyyy-mm-dd[Thh:mm[:ss]].\n"), localTime);
    }
    lt.wMilliseconds = 0;
-   if (TzSpecificLocalTimeToSystemTime((TIME_ZONE_INFORMATION *)NULL, &lt, &st) == 0) {
+   if (TzSpecificLocalTimeToSystemTime((TIME_ZONE_INFORMATION *)NULL, &lt, &st) == 0) {   // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't convert local time %s to system time"), localTime); // GCOVR_EXCL_LINE
    }
 
    static FILETIME ft;
    // Converts the current system time to file time format
-   if (SystemTimeToFileTime(&st, &ft) == 0) {
+   if (SystemTimeToFileTime(&st, &ft) == 0) {                              // GCOVR_EXCL_BR_LINE
       return printLastError(_T("Can't convert system time to file time")); // GCOVR_EXCL_LINE
    }
 
@@ -438,14 +438,15 @@ tResult runCommandForEachInputLine(int argc, wchar_t *argv[], tResult (*command)
             do {
                // Start behind the current content
                DWORD Offset = _tcslen(IoBufferWideCharacter);
-               if (FALSE == ReadFile(InHandle, IoBuffer, SIZE_IO_BUFFER - Offset - 1, &BytesRead, NULL)) {
-                  result &= printLastError(_T("Error reading file %s"), DosDevicePathResponseFile); // GCOVR_EXCL_LINE
+               if (FALSE == ReadFile(InHandle, IoBuffer, SIZE_IO_BUFFER - Offset - 1, &BytesRead, NULL)) { // GCOVR_EXCL_BR_LINE
+                  result &= printLastError(_T("Error reading file %s"), DosDevicePathResponseFile);        // GCOVR_EXCL_LINE
                }
                if (BytesRead != 0) {
                   // Add a \0 after the read content
                   IoBuffer[BytesRead] = '\0';
                   // ...and convert it.
-                  if (MultiByteToWideChar(CP_ACP, 0, IoBuffer, -1, &IoBufferWideCharacter[Offset], SIZE_IO_BUFFER - Offset) == 0) {
+                  if (MultiByteToWideChar(CP_ACP, 0, IoBuffer, -1, &IoBufferWideCharacter[Offset], SIZE_IO_BUFFER - Offset) // GCOVR_EXCL_BR_LINE
+                      == 0) {
                      result &= printLastError(_T("Error converting file content of %s"), DosDevicePathResponseFile); // GCOVR_EXCL_LINE
                   } else {
                      LPTSTR PtrStart = IoBufferWideCharacter;
@@ -515,7 +516,7 @@ tResult checkUniqueName(void) {
    }
    if (result == eOk) {
       *CurrentFilename = malloc(_tcslen(PtrFilenameStart) * sizeof(TCHAR *));
-      if (*CurrentFilename == NULL) {
+      if (*CurrentFilename == NULL) {                                                 // GCOVR_EXCL_BR_LINE
          result &= printLastError(_T("Can't allocate memory for current filenames")); // GCOVR_EXCL_LINE
       }
       _tcscpy(*CurrentFilename, PtrFilenameStart);
@@ -530,7 +531,7 @@ tResult checkUniqueNames(int argc, wchar_t *argv[]) {
                                                    // (needed for freeing the space)
 
    KnownFilenames = malloc(ListSize);
-   if (KnownFilenames == NULL) {
+   if (KnownFilenames == NULL) {                                                   // GCOVR_EXCL_BR_LINE
       result &= printLastError(_T("Can't allocate memory for list of filenames")); // GCOVR_EXCL_LINE
    } else {
       memset(KnownFilenames, 0, ListSize);
@@ -540,13 +541,13 @@ tResult checkUniqueNames(int argc, wchar_t *argv[]) {
       TCHAR **CurrentFilename = KnownFilenames;
       while (*CurrentFilename != NULL) {
          free(*CurrentFilename);
-         if (errno != 0) {
+         if (errno != 0) {                                                 // GCOVR_EXCL_BR_LINE
             result &= printLastError(_T("Can't free memory of filename")); // GCOVR_EXCL_LINE
          }
          ++CurrentFilename;
       }
       free(KnownFilenames);
-      if (errno != 0) {
+      if (errno != 0) {                                                          // GCOVR_EXCL_BR_LINE
          result &= printLastError(_T("Can't free memory of list of filenames")); // GCOVR_EXCL_LINE
       }
    }
@@ -569,13 +570,13 @@ tResult printFileToHandle(LPCTSTR currentPath, HANDLE *outHandle) {
    if (result == eOk) {
       DWORD BytesRead = 0;
       do {
-         if (FALSE == ReadFile(InHandle, IoBuffer, SIZE_IO_BUFFER, &BytesRead, NULL)) {
+         if (FALSE == ReadFile(InHandle, IoBuffer, SIZE_IO_BUFFER, &BytesRead, NULL)) {              // GCOVR_EXCL_BR_LINE
             result &= printLastError(_T("Error reading file %s"), getReadableFilename(currentPath)); // GCOVR_EXCL_LINE
          }
          if (BytesRead != 0) {
             DWORD BytesWritten = 0;
-            if (WriteFile(outHandle, IoBuffer, BytesRead, &BytesWritten, NULL) == 0) {
-               result &= printLastError(_T("Error writing to output handle")); // GCOVR_EXCL_LINE
+            if (WriteFile(outHandle, IoBuffer, BytesRead, &BytesWritten, NULL) == 0) { // GCOVR_EXCL_BR_LINE
+               result &= printLastError(_T("Error writing to output handle"));         // GCOVR_EXCL_LINE
             }
          }
       } while ((result == eOk) && (BytesRead != 0));

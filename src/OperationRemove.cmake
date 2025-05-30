@@ -4,6 +4,11 @@ test_fileop_command_common(
 )
 
 test_fileop_check_filesystem(
+   NAME RemoveNonExistingI
+   ARGS remove file
+)
+
+test_fileop_check_filesystem(
    NAME RemoveNonExisting
    ARGS --debug remove file
    PASS_REGULAR_EXPRESSION "Skip .+\\\\file because it doesn't exist\\."
@@ -40,7 +45,15 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME RemoveNotEmptyDirectoryRecursiveForce
    PREPARE_COMMAND ${REMOVE_PREPARE_COMMAND}
-   ARGS remove --recursive --force test
+   ARGS remove -r --force test
+   MUST_EXIST junction_target/test_file
+   MUST_NOT_EXIST test/subdir/junction/test_file test/subdir/test_file_1 test/subdir/test_file_3
+)
+
+test_fileop_check_filesystem(
+   NAME RemoveNotEmptyDirectoryRecursiveF
+   PREPARE_COMMAND ${REMOVE_PREPARE_COMMAND}
+   ARGS remove -R -f test
    MUST_EXIST junction_target/test_file
    MUST_NOT_EXIST test/subdir/junction/test_file test/subdir/test_file_1 test/subdir/test_file_3
 )

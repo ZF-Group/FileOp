@@ -30,7 +30,7 @@ static tResult removeOperation(void) {
          result &= clearReadonly(DosDevicePath, dwAttrs);
       }
 
-      if (result == eOk) {
+      if (result == eOk) { // GCOVR_EXCL_BR_LINE
          if (isReparsePoint(dwAttrs)) {
             result &= removeReparsePoint(DosDevicePath);
          } else if (isDirectory(dwAttrs)) {
@@ -69,7 +69,7 @@ static tResult removeOperation(void) {
 
                   StartOfName[-1] = _T('\0');
                   // close handle to file
-                  if (!FindClose(hFind)) {
+                  if (!FindClose(hFind)) {                                            // GCOVR_EXCL_BR_LINE
                      result &= printLastError(_T("Can't close file search handle.")); // GCOVR_EXCL_LINE
                   }
                }
