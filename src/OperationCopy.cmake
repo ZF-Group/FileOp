@@ -92,7 +92,7 @@ test_fileop_check_filesystem(
 
 test_fileop_check_filesystem(
    NAME CopyFileList
-   ARGS copy --force --time 2004-01-02T00:30 ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.h ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.c  ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.cmake .
+   ARGS copy --force --check-unique-names --time 2004-01-02T00:30 ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.h ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.c  ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.cmake .
    MUST_EXIST OperationCopy.c OperationCopy.cmake OperationCopy.h
    FILE_TIMESTAMP_REGEX "2004-01-02 00:30:00\\.000000000 \\+0000"
 )
@@ -124,7 +124,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME CopyDirectoryRecursiveForce
    PREPARE_COMMAND "cp -rf --target-directory=. ${CMAKE_CURRENT_LIST_DIR}"
-   ARGS copy --recursive --force --time 2008-01-02T00:30 --target-directory=. ${CMAKE_CURRENT_LIST_DIR}
+   ARGS copy -r --force --time 2008-01-02T00:30 --target-directory=. ${CMAKE_CURRENT_LIST_DIR}
    MUST_EXIST src/OperationCopy.c src/OperationCopy.cmake src/OperationCopy.h
    FILE_TIMESTAMP_REGEX "2008-01-02 00:30:00\\.000000000 \\+0000"
 )
@@ -132,7 +132,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME CopyDirectoryRecursiveForceProtected
    PREPARE_COMMAND "cp -rf --target-directory=. ${CMAKE_CURRENT_LIST_DIR} && chmod -R oga-w ."
-   ARGS copy --recursive --force --time 2009-01-02T00:30 --target-directory=. ${CMAKE_CURRENT_LIST_DIR}
+   ARGS copy -R -f --time 2009-01-02T00:30 -t . ${CMAKE_CURRENT_LIST_DIR}
    MUST_EXIST src/OperationCopy.c src/OperationCopy.cmake src/OperationCopy.h
    FILE_TIMESTAMP_REGEX "2009-01-02 00:30:00\\.000000000 \\+0000"
 )
@@ -140,7 +140,7 @@ test_fileop_check_filesystem(
 test_fileop_check_filesystem(
    NAME CopyFileForceProtected
    PREPARE_COMMAND "cp -rf --target-directory=. ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.c && chmod -R oga-w OperationCopy.c"
-   ARGS copy --recursive --force --time 2010-01-02T00:30 --target-directory=. ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.c
+   ARGS copy --force --time 2010-01-02T00:30 --target-directory=. ${CMAKE_CURRENT_LIST_DIR}/OperationCopy.c
    MUST_EXIST OperationCopy.c
    FILE_TIMESTAMP_REGEX "2010-01-02 00:30:00\\.000000000 \\+0000"
 )

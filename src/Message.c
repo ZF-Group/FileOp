@@ -49,14 +49,14 @@ tResult printErr(LPCTSTR MsgTxt, ...) {
  */
 tResult printLastError(LPCTSTR MsgTxt, ...) {
    DWORD dwLastError = GetLastError();
-   if (dwLastError) {
+   if (dwLastError) { // GCOVR_EXCL_BR_LINE
       va_list vl;
       va_start(vl, MsgTxt);
       int MsgLength = _vsntprintf(MsgBuffer, SIZE_MSG_BUFFER, MsgTxt, vl);
       va_end(vl);
       MsgLength += _sntprintf(&MsgBuffer[MsgLength], SIZE_MSG_BUFFER - MsgLength, _T(": "));
-      if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwLastError, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), (LPTSTR)&MsgBuffer[MsgLength],
-                        SIZE_MSG_BUFFER - MsgLength, NULL) == 0) {
+      if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwLastError, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), // GCOVR_EXCL_BR_LINE
+                        (LPTSTR)&MsgBuffer[MsgLength], SIZE_MSG_BUFFER - MsgLength, NULL) == 0) {
          _sntprintf(&MsgBuffer[MsgLength], SIZE_MSG_BUFFER - MsgLength, _T("GetLastError() = %d\n"), dwLastError); // GCOVR_EXCL_LINE
       }
       return printErr(_T("%s"), MsgBuffer);

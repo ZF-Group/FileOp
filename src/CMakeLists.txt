@@ -119,7 +119,7 @@ project(FileOp C RC)
       )
       test_fileop(
          NAME Run_${arg_COMMAND}_WithLonesomeDash
-         ARGS --debug ${arg_COMMAND} -- --xxx
+         ARGS -d ${arg_COMMAND} -- --xxx
          WORKING_DIRECTORY ${arg_WORKING_DIRECTORY}
          WILL_FAIL
          FAIL_REGULAR_EXPRESSION "-- detected, stop option parsing\\."
@@ -260,6 +260,12 @@ project(FileOp C RC)
    test_fileop(
       NAME Run_WithOptionHelp
       ARGS --help
+      PASS_REGULAR_EXPRESSION "FileOp\\.exe \\[<options>\\] \\[<command> \\[<options>\\] <argument\\+>\\]"
+   )
+
+   test_fileop(
+      NAME Run_WithOptionH
+      ARGS -h
       PASS_REGULAR_EXPRESSION "FileOp\\.exe \\[<options>\\] \\[<command> \\[<options>\\] <argument\\+>\\]"
    )
 

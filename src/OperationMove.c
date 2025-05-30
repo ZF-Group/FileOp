@@ -102,9 +102,9 @@ static tResult moveOperation(void) {
                         // recursive move it
                         result &= moveOperation();
                      }
-                  } while ((result == eOk) && (FindNextFile(hFind, &FindFileData) != 0));
+                  } while ((result == eOk) && (FindNextFile(hFind, &FindFileData) != 0)); // GCOVR_EXCL_BR_LINE
                   StartOfSourceName[-1] = _T('\0');
-                  if (result == eOk) {
+                  if (result == eOk) { // GCOVR_EXCL_BR_LINE
                      // We are at the end of the list
                      // GCOVR_EXCL_START
                      if (GetLastError() != ERROR_NO_MORE_FILES) {
@@ -114,8 +114,8 @@ static tResult moveOperation(void) {
                   }
 
                   // close handle to file
-                  if (!FindClose(hFind)) {
-                     result &= printLastError(_T("Can't close file search handle."));// GCOVR_EXCL_LINE
+                  if (!FindClose(hFind)) {                                            // GCOVR_EXCL_BR_LINE
+                     result &= printLastError(_T("Can't close file search handle.")); // GCOVR_EXCL_LINE
                   }
                   removeEmptyDirectory(DosDevicePath);
                }

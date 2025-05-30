@@ -5,43 +5,47 @@ test_fileop_command_common(
 
 test_fileop_check_filesystem(
    NAME Mkdir
-   ARGS mkdir mkdir
-   MUST_EXIST mkdir
+   ARGS mkdir dir
+   MUST_EXIST dir
+)
+
+test_fileop_check_filesystem(
+   NAME MkdirTrailingSlash
+   ARGS mkdir dir///
+   MUST_EXIST dir///
 )
 
 test_fileop_check_filesystem(
    NAME MkdirExistingDir
-   ARGS mkdir mkdir
-   DEPENDS Mkdir
+   PREPARE_COMMAND "mkdir dir"
+   ARGS mkdir dir
    WILL_FAIL
-   FAIL_REGULAR_EXPRESSION "FileOp\\.exe: error: Directory [A-Z]:\\\\.+\\\\mkdir already exists\\."
+   FAIL_REGULAR_EXPRESSION "FileOp\\.exe: error: Directory [A-Z]:\\\\.+\\\\dir already exists\\."
 )
 
 test_fileop_check_filesystem(
    NAME MkdirExistingDirParents
+   PREPARE_COMMAND "mkdir dir"
    ARGS mkdir --parents mkdir
-   DEPENDS Mkdir
 )
 
 test_fileop_check_filesystem(
    NAME MkdirDirStructure
-   ARGS mkdir mkdir/a/b/c
-   DEPENDS MkdirExistingDirParents
+   ARGS mkdir a/b/c
    WILL_FAIL
-   MUST_NOT_EXIST mkdir/a/b/c
+   MUST_NOT_EXIST a/b/c
 )
 
 test_fileop_check_filesystem(
    NAME MkdirDirStructureParents
-   ARGS mkdir --parents mkdir/a/b/c
-   DEPENDS MkdirDirStructure
-   MUST_EXIST mkdir/a/b/c
+   ARGS mkdir -p a/b/c
+   MUST_EXIST a/b/c
 )
 
 test_fileop_check_filesystem(
    NAME MkdirWithDashDash
-   ARGS mkdir -- --mkdir
-   MUST_EXIST --mkdir
+   ARGS mkdir -- --dir
+   MUST_EXIST --dir
 )
 
 test_fileop_check_filesystem(

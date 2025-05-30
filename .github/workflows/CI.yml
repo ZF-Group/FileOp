@@ -56,11 +56,16 @@ jobs:
           apt update
           apt install -y git
       - uses: actions/checkout@v4
+     
+      - name: Install build tools
+        run: |
+          ./scripts/container.setup.sh
 
       - name: Configure
         run: |
           git config --global --add safe.directory $PWD
           ./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
+
       - name: Build
         run:
           ./scripts/cmake.build.sh
@@ -88,12 +93,20 @@ jobs:
         run: choco install ninja
       - name: Install gcovr
         if: ${{ matrix.BuildType == 'Profile' }}
-        run: pip install git+https://github.com/gcovr/gcovr.git # gcovr==8.3
+        run: pip install gcovr==8.3
 
       - name: Configure
         run: ./scripts/cmake.configure.sh -DCMAKE_BUILD_TYPE=${{ matrix.BuildType }}
+
       - name: Build
         run: ./scripts/cmake.build.sh
+      - name: Upload FileOp.7z
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-windows${{ matrix.BuildType == 'Profile' && '-profile' || ''}}
+          path: build/FileOp.7z
+
       - name: Test
         run: |
           ./scripts/cmake.test.sh || ExitCode=$?
@@ -104,6 +117,12 @@ jobs:
       - name: Run performance test
         if: always()
         run: ./scripts/run_test_performance.sh  2>&1 | tee performance.txt
+      - name: Upload performance report
+        if: ${{ matrix.BuildType == 'Release' && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance
+          path: performance.txt
 
       - name: Create coverage report
         if: ${{ matrix.BuildType == 'Profile' && always() }}
@@ -112,7 +131,6 @@ jobs:
             --filter src/ \
             --exclude-noncode-lines build \
             --txt coverage.txt \
-            --markdown coverage.md --markdown-title "Test coverage report" --markdown-file-link 'https://github.com/Spacetown/FileOp/blob/${{ github.sha }}/{file}' \
             --json coverage.json --json-pretty \
             --html-single-page --html-title "GCOVR report for $(git rev-parse HEAD)" --html-details coverage.html
           cat coverage.txt
@@ -124,32 +142,30 @@ jobs:
           name: coverage
           path: coverage.*
 
-      - name: Upload ZIP
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-windows${{ matrix.BuildType == 'Profile' && '-profile' || ''}}
-          path: build/FileOp.7z
-
-      - name: Add job summary
-        if: ${{ matrix.BuildType == 'Profile' && always() }}
-        run: |
-          (
-            cat coverage.md
-            echo ""
-            cat performance.txt
-          ) >> $GITHUB_STEP_SUMMARY
-
   deploy:
     needs:
       - container-build
       - build
     runs-on: Windows-latest
+    permissions:
+      contents: write
     steps:
-      - name: Download artifacts
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        run: |
+          echo "FILEOP_VERSION=$(scripts/get_version.sh)" >> $GITHUB_ENV
+      - name: Download apps
         uses: actions/download-artifact@v4
         with:
           pattern: app-*
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+      - name: Download performance report
+        uses: actions/download-artifact@v4
+        with:
+          name: performance
       # cspell:ignore oapp
       - name: Test container release build
         run: |
@@ -163,3 +179,46 @@ jobs:
         run: |
           7z x -oapp-windows-profile app-windows-profile/FileOp.7z
           ./app-windows-profile/FileOp.exe --help
+
+      - name: Create release notes
+        run: |
+          sed -n '/^## / { p; :a; n; /^## /q; p; ba; }' Changelog.md | sed -e 's/^## /# /;' > release_notes.md
+
+      - name: Add job summary
+        run: |
+          (
+            cat release_notes.md
+            echo ""
+            echo "# Test coverage report"
+            echo ""
+            echo '```'
+            cat coverage.txt
+            echo '```'
+            echo ""
+            cat performance.txt
+          ) >> $GITHUB_STEP_SUMMARY
+
+      - name: Create new tag
+        run: |
+          # Set git user info
+          git config --global user.email "noreply@zf.com"
+          git config --global user.name "FileOp authors"
+
+          # Create the tag and print the output.
+          sed -e "/^# / { s/^# //; s/$/ $(date -I)/; }" release_notes.md | tee commit_msg.txt
+          git tag -a "$FILEOP_VERSION" -F commit_msg.txt
+          git tag --list -n "$FILEOP_VERSION"
+
+      - name: Push new tag
+        if: ${{ (github.repository == 'ZF-Group/FileOp') && (github.event.ref == 'refs/heads/main') && (env.FILEOP_VERSION != '0.0.0') }}
+        run: |
+          git push origin "refs/tags/$FILEOP_VERSION"
+
+      - name: Create release and upload build artifacts
+        if: ${{ (github.repository == 'ZF-Group/FileOp') && (github.event.ref == 'refs/heads/main') && (env.FILEOP_VERSION != '0.0.0') }}
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191
+        with:
+          tag_name: ${{ env.FILEOP_VERSION }}
+          body_path: release_notes.md
+          files: ./app-windows/FileOp.exe
+

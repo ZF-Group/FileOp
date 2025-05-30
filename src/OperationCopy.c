@@ -100,7 +100,7 @@ static tResult copyOperation(void) {
 
                StartOfSourceName[-1] = _T('\0');
                // close handle to file
-               if (!FindClose(hFind)) {
+               if (!FindClose(hFind)) {                                            // GCOVR_EXCL_BR_LINE
                   result &= printLastError(_T("Can't close file search handle.")); // GCOVR_EXCL_LINE
                }
             }
